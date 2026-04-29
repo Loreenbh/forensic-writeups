@@ -24,11 +24,10 @@ Each write-up follows a consistent investigation methodology:
 
 
 ## Repository Structure
-/linux_forensics
-/web_security
-/privilege_escalation
-/malware_analysis
-/misc
+/linux_forensics  
+/web_security  
+/privilege_escalation  
+/malware_analysis  
 
 ## Links
 - HackTheBox: https://app.hackthebox.com/users/2994472
