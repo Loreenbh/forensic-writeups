@@ -24,12 +24,12 @@ Each write-up follows a consistent investigation methodology:
 
 
 ## Repository Structure
-forensic-writeups/
-├── linux_forensics/
-├── web_security/
-├── privilege_escalation/
-├── malware_analysis/
-└── misc/
+forensic-writeups/  
+├── linux_forensics/  
+├── web_security/  
+├── privilege_escalation/  
+├── malware_analysis/  
+└── misc/  
 
 ## Links
 - HackTheBox: https://app.hackthebox.com/users/2994472
