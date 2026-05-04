@@ -1,56 +1,48 @@
 # LD_PRELOAD Userland Rootkit Analysis
 
 ## Context
-
-The investigation started from an alert on an SSH server reporting unusual library linking errors and inconsistencies in filesystem visibility (missing directories despite being expected).
-
-This suggested a potential manipulation at runtime rather than actual file deletion.
-
+The investigation started from an alert on an SSH server reporting unusual library linking errors and missing directories that were expected to exist.
+This suggested that the issue was not caused by file deletion, but by something modifying how the system displays information.
 
 
 ## Analysis
-
 A userland rootkit was suspected.
-
-On Linux systems, dynamic linking can be abused using mechanisms such as `LD_PRELOAD` or `/etc/ld.so.preload`, allowing a malicious shared library to be injected into all dynamically linked processes.
-
-This can alter the behavior of standard system utilities without modifying the underlying filesystem.
-
-The dynamic linker configuration was therefore reviewed.
-
-The system was found to use a non-standard shared library configured through the preload mechanism:
+On Linux systems, a mechanism called `LD_PRELOAD` or `/etc/ld.so.preload` can be used to force the system to load a shared library before other libraries. This can change how system commands behave.
+The dynamic linker configuration was checked:
 
 ```bash
 cat /etc/ld.so.preload
 ```
-A custom library was referenced, indicating forced injection at runtime.
+A custom library was found:
+```bash
+/lib/x86_64-linux-gnu/libc.hook.so.6
+```
+This indicates that a non-standard library is being loaded automatically by the system.
 
-To confirm the impact on system binaries, dynamic dependencies of standard utilities were inspected:
+To confirm its effect, the dependencies of a system command were checked:
 ```bash
 ldd /bin/ls
 ```
-The output confirmed that the suspicious library was loaded alongside standard system libraries, indicating that core system tools were being affected at runtime.
+The output showed that this library was loaded together with normal system libraries. This means that basic commands like ls are affected.
 
-## Findings & Impact
+## Findings
 
-Analysis of the injected library showed that it hooks multiple libc functions, including directory listing, file access, and string filtering functions.
+The injected library was analyzing system calls and modifying their behavior.
 
-By intercepting these calls, the rootkit is able to:
+It hooks important functions such as:
+- file listing functions
+- file opening functions
+- string search functions
 
-- hide files and directories
-- filter specific names from output
-- restrict visibility of certain resources
+Because of this, it can:
+- hide files or folders
+- filter certain names
+- change what the user sees
 
-This explains the inconsistencies observed in filesystem enumeration.
-
-Once the malicious component was no longer active, system behavior returned to normal. Previously hidden files became visible again through standard enumeration tools, confirming that the filesystem itself was intact and only its representation had been altered at runtime.
-
-This validated the presence of a userland rootkit manipulating system output through dynamic linking interception.
+This explains why some files and directories appeared to be missing.
 
 ## Conclusion
 
-The issue was caused by a userland rootkit leveraging the dynamic linker preload mechanism.
-
-By injecting a malicious shared library into processes, the attacker was able to modify the behavior of system utilities and hide files without altering the filesystem.
-
-This highlights the importance of verifying dynamic linker configurations during incident response investigations.
+The issue was caused by a userland rootkit using the Linux preload mechanism.
+By loading a malicious shared library into processes, the attacker was able to modify system behavior and hide files without deleting them.
+This shows that system commands are not always reliable when a system is compromised.
