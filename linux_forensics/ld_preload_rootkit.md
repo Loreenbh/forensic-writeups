@@ -23,7 +23,7 @@ To confirm its effect, the dependencies of a system command were checked:
 ```bash
 ldd /bin/ls
 ```
-The output showed that this library was loaded together with normal system libraries. This means that basic commands like ls are affected.
+The output showed that this library was loaded together with normal system libraries. This means that basic commands like `ls` are affected.
 
 ## Findings
 
